@@ -62,7 +62,7 @@ pip install pulumi pulumi_aws
 Update your Pulumi configuration file (`Pulumi.yaml` and `Pulumi.prod.yaml`) with the correct AWS region and stack details.
 
 ```sh
-pulumi config set region us-east-1
+pulumi config set region <region-name>
 ```
 
 3. **Deploy the Stack**
