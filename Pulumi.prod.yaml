@@ -1,0 +1,4 @@
+config:
+  uptime:region: eu-west-2
+environment:
+  - aws
