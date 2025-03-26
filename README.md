@@ -55,23 +55,23 @@ graph TD;
 
 ```sh
 pip install pulumi pulumi_aws
-```sh
+```
 
 2. **Configure Pulumi**
 
    Update your Pulumi configuration file (`Pulumi.yaml` and `Pulumi.prod.yaml`) with the correct AWS region and stack details.
-   
+
 ```sh
 pulumi config set region us-east-1
-```sh
+```
 
 3. **Deploy the Stack**
 
    Run the following command to deploy your infrastructure:
-   
+
 ```sh
 pulumi up
-```sh
+```
 
    Confirm the changes, and Pulumi will provision the Lambda function, S3 bucket, CloudWatch dashboard, and all associated resources.
 
@@ -91,4 +91,3 @@ pulumi up
 
 - **CloudWatch Alarms:**  
   Alarms are set up on both Lambda errors and Route53 health check failures. This ensures that any downtime or service degradation triggers immediate alerts for SRE action.
-
