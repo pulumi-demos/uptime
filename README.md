@@ -19,12 +19,11 @@ This setup allows SRE teams to have a clear and immediate overview of service re
 The following Mermaid diagram illustrates the high-level architecture and dependencies managed by this project:
 
 ```mermaid
-mermaid
 graph TD;
-    subgraph Infrastructure (Pulumi IaC)
+    subgraph Infrastructure - Pulumi IaC
         A[Pulumi Program] 
         B[AWS Lambda Function]
-        C[S3 Bucket (Lambda Code)]
+        C[S3 Bucket - Lambda Code]
         D[CloudWatch Dashboard]
         E[CloudWatch Alarms]
         F[Route53 Health Check]
