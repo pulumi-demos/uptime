@@ -78,13 +78,13 @@ pulumi up
 ## How It Works
 
 - **AWS Lambda Function:**  
-  The Lambda function (defined in `lambda/index.py`) first checks for the presence of the required `BUCKET_NAME` environment variable. It then attempts to access the specified S3 bucket. If the bucket is unreachable due to permission issues or other errors, the function fails. If the bucket is accessible, the function counts the number of objects in the bucket (even if it's empty) and returns a 200 response that includes the bucket name and the object count.
+  The Lambda function (defined in `lambda/index.py`) first checks for the presence of the required `BUCKET_NAME` environment variable. It then attempts to access the specified S3 bucket. If the bucket is unreachable due to permission issues or other errors, the function fails. If the bucket is accessible, the function counts the number of objects in the bucket (even if it's empty) and returns a `200` response that includes the bucket name and the object count.
 
 - **Function URL:**  
   The Lambda function is exposed via a Function URL, making it publicly accessible for health checks.
 
 - **Route53 Health Check:**  
-  Configured to run every 10 seconds, the Route53 health check pings the Lambda Function URL and checks for a healthy (200) response. If the response is below 200, the check fails.
+  Configured to run every 10 seconds, the Route53 health check pings the Lambda Function URL and checks for a healthy `200` response. If the response is below `200`, the check fails.
 
 - **CloudWatch Metrics and Dashboard:**  
   Metrics such as invocations, duration (both average and p95), errors, and throttles are aggregated and visualized on a CloudWatch dashboard. This dashboard is designed with SRE metrics in mind.
