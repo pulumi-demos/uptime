@@ -13,14 +13,15 @@ In this exercise, you'll refactor the existing monolith application into separat
 
 2. **Phase 2: Introduce a New Service**  
    Create a third Pulumi project:
-   - **New Service Project:**  
-     A service that writes items (files) to the shared S3 bucket, demonstrating resource sharing across projects.
+   - **Weather Service Project:**  
+     A service that looks up the weather in Seattle and writes it to the shared S3 bucket.
+     The code for the weather service is located [here](./weather/index.py).
 
 At the end of this exercise, you will have three Pulumi projects:
 
 - **Shared Services:** Contains the S3 bucket and any other shared infrastructure.
 - **Uptime Service:** The original Lambda uptime service using the shared bucket.
-- **New Service:** A service that writes files to the shared S3 bucket.
+- **Weather Service:** A service that looks up the weather in Seattle and writes it to the shared S3 bucket.
 
 ## Detailed Steps
 
@@ -94,7 +95,7 @@ By the end of this workshop, you should have:
 - **Three Pulumi Projects:**
   1. **Shared Services:** Managing shared resources like the S3 bucket.
   2. **Uptime Service:** A Lambda-based uptime monitoring service referencing the shared bucket.
-  3. **Writer Service:** A service that writes files to the shared S3 bucket.
+  3. **Weather Service:** A service that looks up the weather in Seattle and writes it to the shared S3 bucket.
 - **Documentation:**  
   A clear structure showing how stack outputs are shared and consumed between projects.
 - **Working Integration:**  
@@ -108,8 +109,8 @@ By the end of this workshop, you should have:
    Set up separate Pulumi projects and configure stack outputs/references.
 3. **Develop and Test:**  
    Deploy your projects and validate the interactions.
-4. **Introduce the New Service:**  
-   Build and integrate the file-writing service, ensuring it uses the shared S3 bucket.
+4. **Introduce the Weather Service:**  
+   Build and integrate the weather service, ensuring it uses the shared S3 bucket.
 5. **Share Learnings:**  
    Discuss any challenges or insights gained during the refactoring process.
 
