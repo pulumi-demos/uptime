@@ -1,6 +1,6 @@
 # Uptime Service Monorepo
 
-This project contains all the code and configuration required to deploy an uptime service on AWS using Pulumi. The service monitors an AWS Lambda function—its performance and health are tracked via CloudWatch metrics, dashboards, and Route53 health checks. The project is set up as a monorepo to manage the uptime service and its dependencies in one place.
+This project contains all the code and configuration required to deploy an uptime service on AWS using Pulumi. The service monitors an AWS Lambda function. Its performance and health are tracked via CloudWatch metrics, dashboards, and Route53 health checks. The project is set up as a monorepo to manage the uptime service and its dependencies in one place.
 
 ## What Are We Trying to Do?
 
