@@ -14,8 +14,8 @@ aws_provider = aws.Provider("aws-provider",
     )
 )
 
-# Create an S3 bucket for storing Lambda code.
-bucket = aws.s3.Bucket("uptime-code-bucket",
+# A shared S3 bucket
+bucket = aws.s3.Bucket("shared-bucket",
     acl="private",
     opts=pulumi.ResourceOptions(provider=aws_provider)
 )
