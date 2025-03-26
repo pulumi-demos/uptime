@@ -51,7 +51,7 @@ graph TD;
 
 1. **Install Pulumi and Python Dependencies**
 
-   Make sure you have Pulumi installed and configured on your machine. Then, install the necessary Python packages:
+Make sure you have Pulumi installed and configured on your machine. Then, install the necessary Python packages:
 
 ```sh
 pip install pulumi pulumi_aws
@@ -59,7 +59,7 @@ pip install pulumi pulumi_aws
 
 2. **Configure Pulumi**
 
-   Update your Pulumi configuration file (`Pulumi.yaml` and `Pulumi.prod.yaml`) with the correct AWS region and stack details.
+Update your Pulumi configuration file (`Pulumi.yaml` and `Pulumi.prod.yaml`) with the correct AWS region and stack details.
 
 ```sh
 pulumi config set region us-east-1
@@ -67,7 +67,7 @@ pulumi config set region us-east-1
 
 3. **Deploy the Stack**
 
-   Run the following command to deploy your infrastructure:
+Run the following command to deploy your infrastructure:
 
 ```sh
 pulumi up
@@ -78,7 +78,7 @@ pulumi up
 ## How It Works
 
 - **AWS Lambda Function:**  
-  The Lambda function (defined in `app/index.py`) returns a 200 response when the required `BUCKET_NAME` environment variable is present. If missing, it raises an error (or returns a non-200 response as needed).
+  The Lambda function (defined in `lambda/index.py`) first checks for the presence of the required `BUCKET_NAME` environment variable. It then attempts to access the specified S3 bucket. If the bucket is unreachable due to permission issues or other errors, the function fails. If the bucket is accessible, the function counts the number of objects in the bucket (even if it's empty) and returns a 200 response that includes the bucket name and the object count.
 
 - **Function URL:**  
   The Lambda function is exposed via a Function URL, making it publicly accessible for health checks.
