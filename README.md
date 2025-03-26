@@ -75,19 +75,37 @@ pulumi up
 
    Confirm the changes, and Pulumi will provision the Lambda function, S3 bucket, CloudWatch dashboard, and all associated resources.
 
+## Golden Signals
+
+To ensure our service remains reliable and performant, we monitor the four golden signals of SRE:
+
+- **Latency:**  
+  Measures how long it takes to process a request. This helps us understand how quickly the system responds.
+
+- **Traffic:**  
+  Captures the volume of requests. This indicates how much load the system is handling.
+
+- **Errors:**  
+  Tracks the rate of failed requests. A spike in errors can signal issues that require immediate attention.
+
+- **Saturation:**  
+  Reflects resource usage (like concurrent executions). High saturation may indicate that the system is nearing its capacity limits.
+
+These metrics provide a clear, quick overview of system health, enabling early detection of issues.
+
 ## How It Works
 
 - **AWS Lambda Function:**  
-  The Lambda function (defined in `lambda/index.py`) first checks for the presence of the required `BUCKET_NAME` environment variable. It then attempts to access the specified S3 bucket. If the bucket is unreachable due to permission issues or other errors, the function fails. If the bucket is accessible, the function counts the number of objects in the bucket (even if it's empty) and returns a `200` response that includes the bucket name and the object count.
+  The Lambda function (defined in `lambda/index.py`) first checks for the required `BUCKET_NAME` environment variable. It then attempts to access the specified S3 bucket. If the bucket is unreachable due to permission issues or other errors, the function fails. If the bucket is accessible, it counts the objects (even if empty) and returns a `200` response that includes the bucket name and the object count.
 
 - **Function URL:**  
   The Lambda function is exposed via a Function URL, making it publicly accessible for health checks.
 
 - **Route53 Health Check:**  
-  Configured to run every 10 seconds, the Route53 health check pings the Lambda Function URL and checks for a healthy `200` response. If the response is below `200`, the check fails.
+  Configured to run every 10 seconds, the Route53 health check pings the Lambda Function URL and verifies that a healthy `200` response is returned. Any deviation triggers a check failure.
 
 - **CloudWatch Metrics and Dashboard:**  
-  Metrics such as invocations, duration (both average and p95), errors, and throttles are aggregated and visualized on a CloudWatch dashboard. This dashboard is designed with SRE metrics in mind.
+  Metrics such as total invocations (Traffic: Total Requests), average latency (Latency: Average Duration), error rate (Errors: Error Rate (%)), and concurrent executions (Saturation: Concurrent Executions) are aggregated and visualized on a CloudWatch dashboard. This dashboard is designed with SRE metrics in mind and follows the golden signals approach to provide a comprehensive view of system performance and reliability.
 
 - **CloudWatch Alarms:**  
-  Alarms are set up on both Lambda errors and Route53 health check failures. This ensures that any downtime or service degradation triggers immediate alerts for SRE action.
+  An alarm is configured using metric math to monitor the Lambda function’s error rate. It calculates the error rate as `(Errors / Invocations) * 100` and triggers if this rate exceeds 0.1% for two consecutive evaluation periods. This ensures that any significant service degradation is promptly detected, triggering immediate SRE action.

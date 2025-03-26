@@ -82,17 +82,42 @@ function_url = aws.lambda_.FunctionUrl("uptime-function-url",
 )
 
 # CloudWatch alarm for Lambda errors.
-error_alarm = aws.cloudwatch.MetricAlarm("uptime-error-alarm",
-    name="uptime-function-errors",
+error_rate_alarm = aws.cloudwatch.MetricAlarm("uptime-error-rate-alarm",
+    name="uptime-function-error-rate",
     comparison_operator="GreaterThanThreshold",
     evaluation_periods=2,
-    metric_name="Errors",
-    namespace="AWS/Lambda",
-    period=10,
-    statistic="Sum",
-    threshold=1,
-    dimensions={"FunctionName": function.name},
-    alarm_description="Alarm when Lambda function has errors",
+    threshold=0.1,  # error rate threshold in percentage
+    metric_queries=[
+        {
+            "id": "m1",
+            "metric": {
+                "namespace": "AWS/Lambda",
+                "metricName": "Invocations",
+                "dimensions": {"FunctionName": function.name},
+                "period": 60,
+                "stat": "Sum",
+            },
+            "return_data": False,
+        },
+        {
+            "id": "m2",
+            "metric": {
+                "namespace": "AWS/Lambda",
+                "metricName": "Errors",
+                "dimensions": {"FunctionName": function.name},
+                "period": 60,
+                "stat": "Sum",
+            },
+            "return_data": False,
+        },
+        {
+            "id": "e1",
+            "expression": "m2/m1*100",
+            "label": "Error Rate (%)",
+            "return_data": True,
+        }
+    ],
+    alarm_description="Alarm when Lambda error rate exceeds threshold",
     opts=pulumi.ResourceOptions(provider=aws_provider)
 )
 
@@ -107,73 +132,64 @@ health_check = aws.route53.HealthCheck("uptime-health-check",
     opts=pulumi.ResourceOptions(provider=aws_provider)
 )
 
-# CloudWatch dashboard with Lambda metrics and Route53 health check status.
-dashboard = aws.cloudwatch.Dashboard("uptime-monitoring-dashboard",
-    dashboard_name="uptime-monitoring-dashboard",
-    dashboard_body=pulumi.Output.all(function.name, health_check.id).apply(lambda args: f'''{{
-      "widgets": [
-        {{
-          "type": "metric",
-          "properties": {{
-            "metrics": [
-              ["AWS/Lambda", "Invocations", "FunctionName", "{args[0]}"]
-            ],
-            "period": 60,
-            "stat": "Sum",
-            "region": "{default_region}",
-            "title": "Lambda Invocations"
-          }}
-        }},
-        {{
-          "type": "metric",
-          "properties": {{
-            "metrics": [
-              ["AWS/Lambda", "Duration", "FunctionName", "{args[0]}"]
-            ],
-            "period": 60,
-            "stat": "Average",
-            "region": "{default_region}",
-            "title": "Lambda Duration"
-          }}
-        }},
-        {{
-          "type": "metric",
-          "properties": {{
-            "metrics": [
-              ["AWS/Lambda", "Errors", "FunctionName", "{args[0]}"]
-            ],
-            "period": 60,
-            "stat": "Sum",
-            "region": "{default_region}",
-            "title": "Lambda Errors"
-          }}
-        }},
-        {{
-          "type": "metric",
-          "properties": {{
-            "metrics": [
-              ["AWS/Lambda", "Throttles", "FunctionName", "{args[0]}"]
-            ],
-            "period": 60,
-            "stat": "Sum",
-            "region": "{default_region}",
-            "title": "Lambda Throttles"
-          }}
-        }},
-        {{
-          "type": "metric",
-          "properties": {{
-            "metrics": [
-              ["AWS/Route53", "HealthCheckStatus", "HealthCheckId", "{args[1]}"]
-            ],
-            "period": 60,
-            "stat": "Average",
-            "region": "{default_region}",
-            "title": "Route53 Health Check Status"
-          }}
-        }}
-      ]
-    }}'''),
+# CloudWatch dashboard with SRE metrics (percentages).
+dashboard = aws.cloudwatch.Dashboard("uptime-service-dashboard",
+    dashboard_name="uptime-service-dashboard",
+    dashboard_body=pulumi.Output.all(function.name).apply(
+        lambda args: f'''{{
+  "widgets": [
+    {{
+      "type": "metric",
+      "properties": {{
+        "metrics": [
+          ["AWS/Lambda", "Invocations", "FunctionName", "{args[0]}"]
+        ],
+        "period": 60,
+        "stat": "Sum",
+        "region": "{default_region}",
+        "title": "Traffic: Total Requests"
+      }}
+    }},
+    {{
+      "type": "metric",
+      "properties": {{
+        "metrics": [
+          ["AWS/Lambda", "Duration", "FunctionName", "{args[0]}"]
+        ],
+        "period": 60,
+        "stat": "Average",
+        "region": "{default_region}",
+        "title": "Latency: Average Duration (ms)"
+      }}
+    }},
+    {{
+      "type": "metric",
+      "properties": {{
+        "metrics": [
+          ["AWS/Lambda", "Invocations", "FunctionName", "{args[0]}", {{"id": "m1", "visible": false}}],
+          ["AWS/Lambda", "Errors", "FunctionName", "{args[0]}", {{"id": "m2", "visible": false}}],
+          [{{"expression": "m2/m1*100", "label": "Error Rate (%)", "id": "e1"}}]
+        ],
+        "period": 60,
+        "region": "{default_region}",
+        "title": "Errors: Error Rate (%)"
+      }}
+    }},
+    {{
+      "type": "metric",
+      "properties": {{
+        "metrics": [
+          ["AWS/Lambda", "ConcurrentExecutions", "FunctionName", "{args[0]}"]
+        ],
+        "period": 60,
+        "stat": "Maximum",
+        "region": "{default_region}",
+        "title": "Saturation: Concurrent Executions"
+      }}
+    }}
+  ]
+}}'''
+    ),
     opts=pulumi.ResourceOptions(provider=aws_provider)
 )
 
